@@ -2,4 +2,5 @@ mss>=9.0.1
 pillow>=10.0.0
 pydantic>=2.0.0
 pyautogui>=0.9.54
+pytesseract>=0.3.13
 pytest>=8.0.0
