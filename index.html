@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athena — AI Computer Use Simulator</title>
+  <meta name="description" content="Interactive browser simulation of the Athena AI computer-use agent.">
+  <style>
+    :root{--bg:#07111f;--panel:#0d1b2a;--panel2:#102238;--line:#203a55;--text:#eaf2ff;--muted:#9bb0c8;--accent:#69b7ff;--good:#53d69a;--warn:#ffc857;--danger:#ff6b7a}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#122844 0,#07111f 45%,#050b13 100%);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;min-height:100vh}
+    .wrap{max-width:1250px;margin:auto;padding:28px}.top{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:22px}.brand{display:flex;gap:14px;align-items:center}.logo{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#69b7ff,#8d7cff);font-weight:800;font-size:22px}.title h1{margin:0;font-size:25px}.title p{margin:3px 0 0;color:var(--muted)}.badge{padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--good);background:#0b201b}
+    .grid{display:grid;grid-template-columns:360px 1fr;gap:18px}.card{background:rgba(13,27,42,.9);border:1px solid var(--line);border-radius:18px;box-shadow:0 15px 45px rgba(0,0,0,.25);overflow:hidden}.card h2{font-size:15px;margin:0;padding:15px 17px;border-bottom:1px solid var(--line)}.body{padding:17px}
+    textarea{width:100%;min-height:120px;resize:vertical;background:#07111f;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:13px;outline:none}textarea:focus{border-color:var(--accent)}
+    button{border:0;border-radius:10px;padding:10px 14px;color:#04101b;background:var(--accent);font-weight:700;cursor:pointer}button.secondary{background:#18324b;color:var(--text);border:1px solid var(--line)}button:disabled{opacity:.5;cursor:not-allowed}.buttons{display:flex;gap:9px;margin-top:11px;flex-wrap:wrap}
+    .screen{min-height:420px;background:#02070d;border:1px solid #29425a;border-radius:13px;margin:17px;position:relative;overflow:hidden}.desktopbar{height:31px;background:#101d2b;border-bottom:1px solid #243b50;display:flex;align-items:center;padding:0 10px;gap:7px;color:#8da5bc;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#40586d}.screen-content{padding:30px;display:flex;align-items:center;justify-content:center;height:calc(100% - 31px)}.notepad{width:min(650px,90%);height:280px;background:#f7f8fa;color:#17202a;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.4);display:none}.notepad .bar{background:#e8ebef;padding:8px 12px;border-radius:8px 8px 0 0;font-size:12px}.notepad .text{padding:20px;white-space:pre-wrap;font-family:Consolas,monospace}.desktop{display:flex;flex-direction:column;align-items:center;gap:12px;color:#7f96aa}.desktop .athena-icon{font-size:50px}.cursor{position:absolute;width:14px;height:20px;transform:rotate(-25deg);border-left:2px solid white;border-bottom:2px solid white;filter:drop-shadow(0 2px 2px #000);display:none;transition:all .5s ease}
+    .columns{display:grid;grid-template-columns:1fr 330px;gap:17px}.log{height:250px;overflow:auto;background:#050b13;padding:12px;font:12px/1.7 Consolas,monospace}.log div{border-bottom:1px solid #102237;padding:2px 0}.ok{color:var(--good)}.info{color:var(--accent)}.warn{color:var(--warn)}.err{color:var(--danger)}.step{display:flex;align-items:center;gap:9px;margin-bottom:10px}.circle{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#13283e;color:#7890a7;font-size:12px}.step.active .circle{background:#19466c;color:#fff}.step.done .circle{background:#174a39;color:#d9fff0}.status{margin-top:15px;padding:10px;border-radius:10px;background:#081522;color:var(--muted)}.examples button{display:block;width:100%;margin:7px 0;text-align:left}.footer{margin-top:17px;color:var(--muted);font-size:12px;text-align:center}
+    @media(max-width:900px){.grid,.columns{grid-template-columns:1fr}.screen{min-height:360px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><div class="brand"><div class="logo">A</div><div class="title"><h1>Athena</h1><p>AI computer-use agent — browser simulation</p></div></div><div class="badge">SIMULATION MODE</div></header>
+  <div class="grid">
+    <section class="card">
+      <h2>Give Athena a task</h2>
+      <div class="body">
+        <textarea id="task" placeholder="Example: Open Notepad and type Hello Athena">Open Notepad and type Hello Athena</textarea>
+        <div class="buttons"><button id="run">▶ Run simulation</button><button class="secondary" id="reset">Reset</button></div>
+        <div class="status" id="status">Ready. Nothing will happen on your real computer.</div>
+        <h2 style="margin:17px -17px -17px">Try an example</h2>
+        <div class="examples" style="margin-top:14px">
+          <button class="secondary example">Open Notepad and type Hello Athena</button>
+          <button class="secondary example">Open Calculator</button>
+          <button class="secondary example">Click the Search button</button>
+          <button class="secondary example">Type my name into the form</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Virtual computer screen</h2>
+      <div class="screen" id="screen">
+        <div class="desktopbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:7px">Athena Virtual Desktop</span></div>
+        <div class="screen-content">
+          <div class="desktop" id="desktop"><div class="athena-icon">◈</div><div>Waiting for Athena...</div></div>
+          <div class="notepad" id="notepad"><div class="bar">Notepad — simulated</div><div class="text" id="notepadText"></div></div>
+        </div>
+        <div class="cursor" id="cursor"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="columns" style="margin-top:18px">
+    <section class="card"><h2>Agent activity</h2><div class="log" id="log"><div class="info">[system] Athena simulation ready.</div></div></section>
+    <section class="card"><h2>Agent pipeline</h2><div class="body">
+      <div class="step" id="s1"><span class="circle">1</span><span>Understand task</span></div>
+      <div class="step" id="s2"><span class="circle">2</span><span>Observe screen</span></div>
+      <div class="step" id="s3"><span class="circle">3</span><span>Plan action</span></div>
+      <div class="step" id="s4"><span class="circle">4</span><span>Execute action</span></div>
+      <div class="step" id="s5"><span class="circle">5</span><span>Verify result</span></div>
+      <div class="status" id="result">No task executed yet.</div>
+    </div></section>
+  </div>
+  <div class="footer">This page is a safe simulation. It does not control your mouse, keyboard, browser, or operating system.</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function log(msg,cls=''){const d=document.createElement('div');d.className=cls;d.textContent='['+new Date().toLocaleTimeString()+'] '+msg;$('log').appendChild(d);$('log').scrollTop=$('log').scrollHeight}
+function step(n,state){const e=$('s'+n);e.classList.remove('active','done');if(state)e.classList.add(state)}
+function reset(){['s1','s2','s3','s4','s5'].forEach(n=>$(n).classList.remove('active','done'));$('desktop').style.display='flex';$('notepad').style.display='none';$('cursor').style.display='none';$('notepadText').textContent='';$('status').textContent='Ready. Nothing will happen on your real computer.';$('result').textContent='No task executed yet.';$('log').innerHTML='<div class="info">[system] Athena simulation reset.</div>';}
+async function run(){const task=$('task').value.trim();if(!task)return;$('run').disabled=true;reset();await sleep(250);step(1,'active');log('Task received: '+task,'info');$('status').textContent='Athena is understanding the task…';await sleep(700);step(1,'done');step(2,'active');log('Capturing virtual screen…','info');$('status').textContent='Observing the virtual desktop…';await sleep(700);step(2,'done');step(3,'active');log('Building an action plan…','info');$('status').textContent='Planning safe simulated actions…';await sleep(800);step(3,'done');step(4,'active');$('status').textContent='Executing simulated actions…';const lower=task.toLowerCase();
+ if(lower.includes('notepad')){$('desktop').style.display='none';$('notepad').style.display='block';log('Action: OPEN notepad','ok');await sleep(500);if(lower.includes('type')){let text='Hello Athena';const m=task.match(/type\s+(.+)/i);if(m)text=m[1].replace(/["']/g,'').trim();$('notepadText').textContent=text;log('Action: TYPE "'+text+'"','ok');}}
+ else if(lower.includes('calculator')){log('Action: OPEN calculator','ok');$('desktop').innerHTML='<div class="athena-icon">🧮</div><div>Calculator opened (simulated)</div>';}
+ else if(lower.includes('search')||lower.includes('click')){log('Action: MOVE cursor to target','ok');$('cursor').style.display='block';$('cursor').style.left='68%';$('cursor').style.top='56%';await sleep(500);log('Action: CLICK target','ok');}
+ else if(lower.includes('type')){let text=task.replace(/^.*?type\s+/i,'').trim();$('desktop').innerHTML='<div class="athena-icon">⌨</div><div>Virtual input field</div><div style="background:#fff;color:#111;padding:10px 18px;border-radius:8px;margin-top:5px">'+text.replace(/[<>&]/g,'')+'</div>';log('Action: TYPE "'+text+'"','ok');}
+ else{log('Action: SIMULATE generic task planning','warn');}
+ await sleep(700);step(4,'done');step(5,'active');$('status').textContent='Verifying the simulated result…';log('Checking result against task…','info');await sleep(700);step(5,'done');$('status').textContent='Simulation completed successfully.';$('result').innerHTML='<span class="ok">✓ Verified simulated result</span>';$('run').disabled=false;}
+$('run').onclick=run;$('reset').onclick=reset;document.querySelectorAll('.example').forEach(b=>b.onclick=()=>{$('task').value=b.textContent;run()});
+</script>
+</body>
+</html>
